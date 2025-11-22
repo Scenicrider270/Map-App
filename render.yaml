@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: mapbox-mongo-app
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false  # Set this in Render dashboard
+      - key: PORT
+        value: 10000  # Render uses port 10000 by default, but will auto-detect
+    healthCheckPath: /health
+

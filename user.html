@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>User Map Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icon.png" type="image/png">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<style>
+  /* Professional Modern Design */
+body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f5f7fa; }
+#map { width:100%; height:100%; }
+
+/* -----------------------------------
+   PROFESSIONAL SIDEBAR DESIGN
+----------------------------------- */
+#sidebar { 
+  width:280px; 
+  position:relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+  border-right: 1px solid #e1e8ed;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.tab-buttons { 
+  display:flex; 
+  gap:8px; 
+  margin:20px 16px 24px 16px; 
+  background:#f1f3f5;
+  padding:4px;
+  border-radius:10px;
+}
+
+.tab-buttons button{ 
+  flex:1; 
+  padding:10px 16px; 
+  border:none; 
+  background:transparent; 
+  color:#64748b; 
+  border-radius:8px; 
+  cursor:pointer; 
+  font-size:14px;
+  font-weight:500;
+  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+
+.tab-buttons button::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#landmarksTabBtn::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
+}
+
+#tracksTabBtn::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12h18M3 6h18M3 18h18'/%3E%3Cpath d='M6 3v18M18 3v18'/%3E%3C/svg%3E");
+}
+
+.tab-buttons button.active{ 
+  background:#ffffff;
+  color:#1e293b;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.tab-buttons button.active::before {
+  filter: brightness(0) saturate(100%) invert(8%) sepia(5%) saturate(2000%) hue-rotate(180deg) brightness(95%) contrast(95%);
+}
+
+.tab-content{ 
+  display:none; 
+  flex:1;
+  overflow-y:auto;
+  padding:0 16px 16px 16px;
+}
+
+.tab-content.active{ 
+  display:block; 
+}
+
+/* -----------------------------------
+   PROFESSIONAL LAYER BUTTON STYLE
+----------------------------------- */
+.layer-btn{
+  width:100%;
+  text-align:left;
+  padding:12px 16px;
+  margin:0 0 8px 0;
+  border:1px solid #e2e8f0;
+  background:#ffffff !important;
+  color:#334155 !important;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:500;
+  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.layer-btn:hover {
+  border-color:#cbd5e1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+.layer-btn.active-click { 
+  background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color:#ffffff !important;
+  border-color:#2563eb;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.layer-btn.inactive{ 
+  opacity:0.5; 
+  background:#f8f9fa !important;
+}
+
+/* -----------------------------------
+   ENTERPRISE PROFESSIONAL LEGEND
+----------------------------------- */
+.legend-color {
+  width:16px;
+  height:16px;
+  border-radius:3px;
+  display:inline-block;
+  border:1px solid rgba(0,0,0,0.1);
+  flex-shrink:0;
+  position:relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+#legend{ 
+  position:absolute; 
+  bottom:20px; 
+  right:20px; 
+  background: #ffffff;
+  padding:0;
+  border-radius:8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
+  z-index:999;
+  max-height:500px;
+  overflow:hidden;
+  min-width:260px;
+  max-width:320px;
+  border:1px solid #e5e7eb;
+}
+
+#legend-header {
+  background: #1f2937;
+  padding:16px 20px;
+  border-radius:8px 8px 0 0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid #374151;
+}
+
+#legend-header-icon {
+  width:20px;
+  height:20px;
+  background: #ffffff;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+#legend-header-icon svg {
+  width:12px;
+  height:12px;
+  stroke:#1f2937;
+  fill:none;
+}
+
+#legend-header-text {
+  color:#ffffff;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#legend-content {
+  padding:16px 20px;
+  max-height:440px;
+  overflow-y:auto;
+  background:#ffffff;
+}
+
+#legend strong {
+  display:none;
+}
+
+.legend-item{ 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  margin:0;
+  font-size:13px;
+  color:#374151;
+  padding:8px 0;
+  transition:all 0.15s ease;
+  font-weight:400;
+  border-bottom:1px solid #f3f4f6;
+}
+
+.legend-item:last-child {
+  border-bottom:none;
+}
+
+.legend-item:hover {
+  padding-left:4px;
+}
+
+.legend-item span:last-child {
+  flex:1;
+  color:#4b5563;
+  font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.legend-group {
+  margin-top:20px;
+}
+
+.legend-group:first-child {
+  margin-top:0;
+}
+
+.legend-group-title {
+  font-size:11px;
+  font-weight:600;
+  color:#6b7280;
+  margin-bottom:10px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0;
+  font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.legend-group-title-icon {
+  width:14px;
+  height:14px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0.7;
+}
+
+.legend-group-title-icon svg {
+  width:14px;
+  height:14px;
+  stroke:#6b7280;
+  fill:none;
+}
+
+/* -----------------------------------
+   PROFESSIONAL LOADING OVERLAY
+----------------------------------- */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.loading-content {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  min-width: 400px;
+  text-align: center;
+  border: 1px solid rgba(226,232,240,0.8);
+}
+
+.loading-spinner {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  animation: rotate 2s linear infinite;
+}
+
+.path {
+  stroke: #3b82f6;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+.loading-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 20px;
+  letter-spacing: 0.3px;
+}
+
+.loading-progress {
+  margin-bottom: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.progress-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 8px;
+}
+
+.loading-details {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+/* -----------------------------------
+   RESPONSIVE
+----------------------------------- */
+/* Custom Scrollbar */
+.tab-content::-webkit-scrollbar,
+#legend-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tab-content::-webkit-scrollbar-track,
+#legend-content::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb,
+#legend-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover,
+#legend-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+        border-right: none;
+        border-bottom: 1px solid #e1e8ed;
+    }
+
+    #legend {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+        min-width: auto;
+        max-height: 50vh;
+    }
+    
+    #legend-header {
+        padding: 14px 18px;
+    }
+    
+    #legend-header-text {
+        font-size: 13px;
+    }
+    
+    #legend-content {
+        padding: 14px 18px;
+        max-height: calc(50vh - 55px);
+    }
+    
+    .legend-item {
+        font-size: 12px;
+        padding: 6px 0;
+    }
+    
+    .legend-color {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    #sidebar {
+        max-height: 45vh;
+    }
+
+    .tab-buttons button {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .layer-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    #legend {
+        bottom: 8px;
+        right: 8px;
+        left: 8px;
+        max-height: 45vh;
+        border-radius: 6px;
+    }
+    
+    #legend-header {
+        padding: 12px 16px;
+    }
+    
+    #legend-header-text {
+        font-size: 12px;
+    }
+    
+    #legend-content {
+        padding: 12px 16px;
+        max-height: calc(45vh - 48px);
+    }
+    
+    .legend-item {
+        font-size: 11px;
+        padding: 6px 0;
+        gap: 10px;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .legend-group-title {
+        font-size: 10px;
+        margin-bottom: 8px;
+    }
+    
+    .legend-group-title-icon {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .legend-group-title-icon svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- WRAPPER (UNCHANGED) -->
+<div style="display:flex; width:100vw; height:100vh; margin-top:0px; overflow:hidden;">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div class="tab-buttons">
+            <button id="landmarksTabBtn" class="active">Landmarks</button>
+            <button id="tracksTabBtn">Tracks</button>
+        </div>
+        <div id="landmarksTab" class="tab-content active">
+            <div id="pointLayers"></div>
+        </div>
+        <div id="tracksTab" class="tab-content">
+            <div id="trackLayers"></div>
+        </div>
+    </div>
+
+    <!-- MAP -->
+    <div id="map-container" style="flex:1; position:relative;">
+        <div id="map"></div>
+        <div id="legend"></div>
+    </div>
+
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+
+<script>
+mapboxgl.accessToken = "pk.eyJ1IjoiYWxpaGFtemEtMTQiLCJhIjoiY2x4dHkzdHJ6MWhzOTJrcXdqcnFsYnU4dyJ9.LbRvUbNnNk2rUq13y-8gFQ";
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v11',
+  center: [72.0, 33.6],
+  zoom: 12
+});
+
+// ENTERPRISE PROFESSIONAL COLOR PALETTE
+// Sophisticated, muted colors that work well together
+const landmarkColors = [
+  "#2563eb",  // Professional Blue
+  "#dc2626",  // Classic Red
+  "#059669",  // Forest Green
+  "#7c3aed",  // Royal Purple
+  "#ea580c",  // Burnt Orange
+  "#0891b2",  // Ocean Blue
+  "#be185d",  // Deep Pink
+  "#0d9488",  // Teal
+  "#b45309",  // Amber
+  "#1e40af"   // Navy Blue
+];
+let bIndex = 0;
+function nextBlue(){ return landmarkColors[bIndex++ % landmarkColors.length]; }
+
+const trackColors = [
+  "#475569",  // Charcoal Gray
+  "#64748b",  // Slate Gray
+  "#334155",  // Dark Slate
+  "#1e293b",  // Deep Slate
+  "#52525b",  // Neutral Gray
+  "#3f3f46",  // Dark Gray
+  "#27272a",  // Almost Black
+  "#57534e",  // Warm Gray
+  "#44403c",  // Brown Gray
+  "#292524"   // Dark Brown Gray
+];
+let brIndex = 0;
+function nextBrown(){ return trackColors[brIndex++ % trackColors.length]; }
+
+// Get color for specific layer names
+function getColorForLayer(layerName){
+  const lowerName = layerName.toLowerCase();
+  
+  // Specific color for Scenic Landscapes (check first to avoid matching regular Landmarks)
+  if(lowerName.includes('scenic') || lowerName.includes('scenic landscape')){
+    return '#669900'; // Olive green for Scenic Landscapes
+  }
+  
+  // Specific color for Landmarks
+  if(lowerName.includes('land') || lowerName.includes('landmark')){
+    return '#ff8800'; // Dark orange for Landmarks
+  }
+  
+  // Specific color for TET Tracks
+  if(lowerName.includes('tet') || lowerName.includes('tet tracks')){
+    return '#9b9693'; // Dark gray for TET Tracks
+  }
+  
+  return null; // Use default color assignment
+}
+
+// ICON TINT/CACHE MECHANISM (optimized)
+const tintedIconCache = new Map(); // colorHex -> imageName
+let baseIconDataUrl = null;
+
+// load base icon once; then load features
+map.on("load", () => {
+    (async ()=>{
+        try{
+            // try to fetch icon.png as blob and convert to dataURL
+            const r = await fetch('icon.png', {cache: "force-cache"});
+            if(r.ok){
+                const blob = await r.blob();
+                baseIconDataUrl = await blobToDataURL(blob);
+            } else {
+                baseIconDataUrl = null;
+            }
+        }catch(e){
+            baseIconDataUrl = null;
+        } finally {
+            await loadFeatures();
+        }
+    })();
+});
+
+// convert blob -> dataURL
+function blobToDataURL(blob){
+  return new Promise(resolve=>{
+    const reader = new FileReader();
+    reader.onload = ()=>resolve(reader.result);
+    reader.onerror = ()=>resolve(null);
+    reader.readAsDataURL(blob);
+  });
+}
+
+// create tint image and add to map, cached per color
+function getOrCreateTintedImageForColor(hexColor){
+  // normalize color key (no #)
+  const key = (hexColor||'').replace('#','').toLowerCase();
+  if(tintedIconCache.has(key)) return Promise.resolve(tintedIconCache.get(key));
+
+  // create canvas tint only once per color
+  return new Promise(resolve=>{
+    if(!baseIconDataUrl){
+      // fallback: use original icon by name 'default_icon' if present, otherwise resolve null
+      // Don't alter UI: if no base icon, skip tinting.
+      const fallbackName = 'default_icon';
+      if(!map.hasImage(fallbackName)){
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = '/icon.png'; // attempt direct path - ok if available
+        img.onload = ()=>{ try{ map.addImage(fallbackName, img); }catch(e){} tintedIconCache.set(key,fallbackName); resolve(fallbackName); };
+        img.onerror = ()=>{ tintedIconCache.set(key,null); resolve(null); };
+      } else { tintedIconCache.set(key, fallbackName); resolve(fallbackName); }
+      return;
+    }
+
+    // create image element from base dataURL
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = baseIconDataUrl;
+
+    img.onload = () => {
+      try{
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+
+        // draw original and tint via 'source-in'
+        ctx.drawImage(img, 0, 0);
+        ctx.globalCompositeOperation = "source-in";
+        ctx.fillStyle = hexColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const dataUrl = canvas.toDataURL();
+
+        // create Image element from dataUrl to pass to map.addImage
+        const tintedImg = new Image();
+        tintedImg.crossOrigin = "anonymous";
+        tintedImg.src = dataUrl;
+        tintedImg.onload = () => {
+          const imageName = 'ic_' + key;
+          try{
+            // only add if not already present
+            if(!map.hasImage(imageName)) map.addImage(imageName, tintedImg);
+            tintedIconCache.set(key, imageName);
+            resolve(imageName);
+          }catch(err){
+            // fallback: store null but resolve
+            tintedIconCache.set(key, null);
+            resolve(null);
+          }
+        };
+        tintedImg.onerror = ()=>{ tintedIconCache.set(key,null); resolve(null); };
+      }catch(err){
+        tintedIconCache.set(key,null);
+        resolve(null);
+      }
+    };
+
+    img.onerror = () => {
+      tintedIconCache.set(key,null);
+      resolve(null);
+    };
+  });
+}
+
+// STORAGE OBJECTS
+let layersData = {};      // per-file metadata (color, sourceId, layerId, etc.)
+let fileLayers = {};      // mapping fileName -> [mapLayerIds...]  (for fast toggling)
+let currentlyIsolated = null;
+
+// UTIL FUNCTIONS
+function sanitizeCoords(c){ 
+  if(Array.isArray(c)) return c.map(sanitizeCoords); 
+  const n = Number(c); 
+  return Number.isFinite(n) ? n : c; 
+}
+
+function extractCoordsFromFeatures(features){
+  const out=[]; 
+  features.forEach(f=>{
+    if(!f?.geometry?.coordinates) return;
+    const g=f.geometry;
+    if(g.type==='Point') out.push([+g.coordinates[0], +g.coordinates[1]]);
+    else if(g.type==='LineString') g.coordinates.forEach(p=>out.push([+p[0], +p[1]]));
+    else if(g.type==='Polygon') g.coordinates.forEach(r=>r.forEach(p=>out.push([+p[0], +p[1]])));
+  });
+  return out;
+}
+
+function boundsFromFeatures(features){
+  const coords = extractCoordsFromFeatures(features);
+  if(!coords.length) return null;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  coords.forEach(([x,y])=>{ 
+    if(x<minX)minX=x; 
+    if(y<minY)minY=y; 
+    if(x>maxX)maxX=x; 
+    if(y>maxY)maxY=y; 
+  });
+  return [[minX,minY],[maxX,maxY]];
+}
+
+// PROFESSIONAL LOADING INDICATOR
+const loadingOverlay = document.createElement('div');
+loadingOverlay.id = 'loading-overlay';
+loadingOverlay.innerHTML = `
+  <div class="loading-content">
+    <div class="loading-spinner">
+      <svg class="spinner" viewBox="0 0 50 50">
+        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+      </svg>
+    </div>
+    <div class="loading-text">
+      <div class="loading-title">Loading Map Data</div>
+      <div class="loading-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0%</div>
+      </div>
+      <div class="loading-details" id="loading-details">Initializing...</div>
+    </div>
+  </div>
+`;
+document.body.appendChild(loadingOverlay);
+
+function showLoading(show = true) {
+  loadingOverlay.style.display = show ? 'flex' : 'none';
+}
+
+function updateLoadingProgress(loaded, total, details = '') {
+  const percentage = total > 0 ? Math.round((loaded / total) * 100) : 0;
+  document.getElementById('progress-fill').style.width = `${percentage}%`;
+  document.getElementById('progress-text').textContent = `${percentage}%`;
+  document.getElementById('loading-details').textContent = details || `Loaded ${loaded.toLocaleString()} of ${total.toLocaleString()} features`;
+}
+
+// ADD LAYER (optimized internals)
+async function addLayerIncrementally(layerName, features, colorPref){
+  // Check for specific layer colors first (these override existing colors)
+  const specificColor = getColorForLayer(layerName);
+  
+  // Use specific color if available, otherwise preserve existing or use provided/default
+  const existingColor = layersData[layerName]?.color;
+  const color = specificColor || existingColor || colorPref || nextBlue();
+  const sourceId = 'src_'+layerName;
+  const layerId = 'lyr_'+layerName;
+
+  // Only update if layer doesn't exist, or update metadata while preserving color
+  if(!layersData[layerName]){
+    layersData[layerName] = {
+      color, sourceId, layerId,
+      batchCursor: features.length,
+      featuresCount: features.length,
+      geomType: features[0]?.geometry?.type || 'Point',
+      bounds: null
+    };
+  } else {
+    // Update metadata but preserve existing color
+    layersData[layerName].batchCursor = features.length;
+    layersData[layerName].featuresCount = features.length;
+    if(!layersData[layerName].geomType) {
+      layersData[layerName].geomType = features[0]?.geometry?.type || 'Point';
+    }
+  }
+
+  // ensure fileLayers entry exists
+  if(!fileLayers[layerName]) fileLayers[layerName] = [];
+
+  const geomType = layersData[layerName].geomType;
+
+  // create or update source quickly
+  if(!map.getSource(sourceId)){
+    map.addSource(sourceId, {
+      type:'geojson',
+      data:{ type:'FeatureCollection', features },
+      cluster: geomType === 'Point',
+      clusterMaxZoom: 14,
+      clusterRadius: 50
+    });
+  } else {
+    map.getSource(sourceId).setData({ type:'FeatureCollection', features });
+  }
+
+  // if point: prepare tinted icon (cached by color) and create layers
+  if(geomType === 'Point'){
+    // get or create tinted icon image name
+    const imageName = await getOrCreateTintedImageForColor(color);
+
+    // cluster circle
+    if(!map.getLayer(layerId+"_clusters")){
+      map.addLayer({
+        id: layerId+"_clusters",
+        type: "circle",
+        source: sourceId,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": color,
+          "circle-radius": ["step", ["get","point_count"], 15, 10, 20, 30, 25],
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#fff"
+        }
+      });
+      fileLayers[layerName].push(layerId+"_clusters");
+    } else {
+      // Update color if layer already exists to ensure it matches legend
+      map.setPaintProperty(layerId+"_clusters", "circle-color", color);
+    }
+
+    // cluster count text
+    if(!map.getLayer(layerId+"_cluster-count")){
+      map.addLayer({
+        id: layerId+"_cluster-count",
+        type: "symbol",
+        source: sourceId,
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": "{point_count_abbreviated}",
+          "text-font": ["Arial Unicode MS Bold"],
+          "text-size": 12
+        },
+        paint: {
+          "text-color": "#ffffff"
+        }
+      });
+      fileLayers[layerName].push(layerId+"_cluster-count");
+    }
+
+    // cluster interactions (only add once per layer)
+    if(!map._clusterHandlers || !map._clusterHandlers.has(layerId+"_clusters")){
+      if(!map._clusterHandlers) map._clusterHandlers = new Set();
+      map._clusterHandlers.add(layerId+"_clusters");
+      
+      map.on('click', layerId+"_clusters", (e)=>{
+        const features = e.features || map.queryRenderedFeatures(e.point, { layers:[layerId+"_clusters"] });
+        if(!features.length) return;
+        const clusterId = features[0].properties.cluster_id;
+        if(clusterId !== undefined){
+          map.getSource(sourceId).getClusterExpansionZoom(clusterId, (err, zoom)=>{
+            if(!err) map.easeTo({ center: features[0].geometry.coordinates, zoom });
+          });
+        }
+      });
+
+      map.on('mouseenter', layerId+"_clusters", ()=>{ map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', layerId+"_clusters", ()=>{ map.getCanvas().style.cursor = ''; });
+    }
+
+    // symbol for individual points (non-cluster)
+    if(!map.getLayer(layerId)){
+      // choose icon-image: prefer tinted imageName if available, otherwise skip icon and use circle symbol
+      const layout = imageName ? {
+        'icon-image': imageName,
+        'icon-size': 0.04,
+        'icon-allow-overlap': true
+      } : {
+        // fallback: use a small circle via 'circle' layer if icon missing (keeps behavior)
+      };
+
+      if(imageName){
+        map.addLayer({
+          id: layerId,
+          type: 'symbol',
+          source: sourceId,
+          filter: ["!", ["has", "point_count"]],
+          layout
+        });
+      } else {
+        // fallback to circle layer to ensure features still display (keeps UI consistent)
+        map.addLayer({
+          id: layerId,
+          type: 'circle',
+          source: sourceId,
+          filter: ["!", ["has", "point_count"]],
+          paint: {
+            'circle-radius': 5,
+            'circle-color': color,
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#fff'
+          }
+        });
+      }
+
+      fileLayers[layerName].push(layerId);
+    }
+
+    layersData[layerName].bounds = boundsFromFeatures(features);
+  }
+
+  else if(geomType === 'LineString'){
+    if(!map.getLayer(layerId)){
+      map.addLayer({
+        id: layerId, type:'line', source:sourceId,
+        layout:{ 'line-join':'round','line-cap':'round' },
+        paint:{ 'line-color':color, 'line-width':2.5 }
+      });
+      fileLayers[layerName].push(layerId);
+    } else {
+      // Update color if layer already exists
+      map.setPaintProperty(layerId, 'line-color', color);
+    }
+    map.getSource(sourceId).setData({ type:'FeatureCollection', features });
+    if(layersData[layerName]) {
+      layersData[layerName].bounds = boundsFromFeatures(features);
+    }
+  }
+  else if(geomType === 'Polygon'){
+    if(!map.getLayer(layerId)){
+      map.addLayer({
+        id: layerId, type:'fill', source:sourceId,
+        paint:{ 'fill-color':color, 'fill-opacity':0.35 }
+      });
+      fileLayers[layerName].push(layerId);
+      map.addLayer({
+        id: layerId+'_outline', type:'line', source:sourceId,
+        paint:{ 'line-color':color, 'line-width':1.2 }
+      });
+      fileLayers[layerName].push(layerId+'_outline');
+    } else {
+      // Update colors if layers already exist
+      map.setPaintProperty(layerId, 'fill-color', color);
+      if(map.getLayer(layerId+'_outline')){
+        map.setPaintProperty(layerId+'_outline', 'line-color', color);
+      }
+    }
+    map.getSource(sourceId).setData({ type:'FeatureCollection', features });
+    if(layersData[layerName]) {
+      layersData[layerName].bounds = boundsFromFeatures(features);
+    }
+  }
+
+  // ensure unique array (in case duplicates pushed)
+  fileLayers[layerName] = Array.from(new Set(fileLayers[layerName]));
+}
+
+// LAYER BUTTON LOGIC — uses fileLayers for instant toggling
+function renderLayerButton(layerName){
+  const meta = layersData[layerName];
+  const key = layerName.toLowerCase();
+
+  const container = key.includes("land") 
+      ? document.getElementById('pointLayers')
+      : document.getElementById('trackLayers');
+
+  const btn = document.createElement('button');
+  btn.className='layer-btn';
+  btn.innerText=formatLayerName(layerName);
+  btn.dataset.visible='true';
+  btn.dataset.layerName = layerName;
+
+btn.onclick = () => { 
+    const LN = btn.dataset.layerName;
+    const isSame = (currentlyIsolated === LN);
+
+    // reset button highlighting
+    document.querySelectorAll(".layer-btn").forEach(b => {
+        b.classList.remove("active-click");
+        b.classList.add("inactive");
+    });
+
+    if (!isSame) {
+        btn.classList.add("active-click");
+        btn.classList.remove("inactive");
+    }
+
+    if (!isSame){
+      // ISOLATE THIS FILE: hide all file layers, show only chosen file layers
+      currentlyIsolated = LN;
+
+      // hide everything quickly using stored IDs
+      Object.keys(fileLayers).forEach(fname=>{
+        const ids = fileLayers[fname] || [];
+        ids.forEach(id=>{
+          if(map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+        });
+      });
+
+      // show the chosen file's layers
+      (fileLayers[LN] || []).forEach(id=>{
+        if(map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible');
+      });
+
+    } else {
+      // SHOW ALL LAYERS AGAIN
+      currentlyIsolated = null;
+
+      Object.keys(fileLayers).forEach(fname=>{
+        const ids = fileLayers[fname] || [];
+        ids.forEach(id=>{
+          if(map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'visible');
+        });
+      });
+
+      document.querySelectorAll(".layer-btn").forEach(b => { b.classList.remove('inactive'); });
+    }
+};
+
+  btn.oncontextmenu = (e)=>{ 
+    e.preventDefault(); 
+    const b = meta.bounds; 
+    if(b) map.fitBounds(b,{padding:40,maxZoom:17}); 
+  };
+
+  container.appendChild(btn);
+}
+
+function findButtonForLayer(layerName){
+  const allBtns = document.querySelectorAll('.layer-btn');
+  for(const b of allBtns){
+    if(b.dataset.layerName === layerName) return b;
+  }
+  return null;
+}
+
+// Format layer names for better display
+function formatLayerName(layerName){
+  // Remove file extensions
+  let clean = layerName.replace(/\..+$/,'');
+  
+  // Layer name mappings for better display
+  const nameMappings = {
+    'binghatti': 'Binghatti Development',
+    'default': 'Default Track',
+    'tier 1 roads': 'Tier 1 Roads',
+    'tier 2 roads': 'Tier 2 Roads',
+    'tet tracks': 'TET Tracks',
+    'scenic landscapes': 'Scenic Landscapes',
+    'landmarks': 'Landmarks'
+  };
+  
+  // Check if we have a mapping
+  const lower = clean.toLowerCase();
+  if(nameMappings[lower]){
+    return nameMappings[lower];
+  }
+  
+  // Capitalize first letter of each word
+  return clean.split(/\s+/).map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ');
+}
+
+// ENTERPRISE PROFESSIONAL LEGEND
+function updateLegend(){
+  const legend = document.getElementById('legend');
+  
+  // Create header
+  const header = document.createElement('div');
+  header.id = 'legend-header';
+  header.innerHTML = `
+    <div id="legend-header-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <line x1="9" y1="3" x2="9" y2="21"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="3" y1="15" x2="21" y2="15"/>
+        <line x1="15" y1="3" x2="15" y2="21"/>
+      </svg>
+    </div>
+    <div id="legend-header-text">Legend</div>
+  `;
+  
+  // Create content container
+  const content = document.createElement('div');
+  content.id = 'legend-content';
+  
+  // Landmarks group
+  const landGroup = document.createElement('div');
+  landGroup.className = 'legend-group';
+  const landTitle = document.createElement('div');
+  landTitle.className = 'legend-group-title';
+  landTitle.innerHTML = `
+    <div class="legend-group-title-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+    </div>
+    <span>Landmarks</span>
+  `;
+  landGroup.appendChild(landTitle);
+
+  // Tracks group
+  const trackGroup = document.createElement('div');
+  trackGroup.className = 'legend-group';
+  const trackTitle = document.createElement('div');
+  trackTitle.className = 'legend-group-title';
+  trackTitle.innerHTML = `
+    <div class="legend-group-title-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12h18M3 6h18M3 18h18"/>
+        <path d="M6 3v18M18 3v18"/>
+      </svg>
+    </div>
+    <span>Tracks</span>
+  `;
+  trackGroup.appendChild(trackTitle);
+
+  let hasLandmarks = false;
+  let hasTracks = false;
+
+  Object.keys(layersData).forEach(k=>{
+    const item = document.createElement('div');
+    item.className='legend-item';
+    const cleanName = formatLayerName(k); // format layer name for display
+    
+    // Create color indicator
+    const colorSpan = document.createElement('span');
+    colorSpan.className = 'legend-color';
+    colorSpan.style.background = layersData[k].color;
+    
+    // Create text span
+    const textSpan = document.createElement('span');
+    textSpan.textContent = cleanName;
+    
+    item.appendChild(colorSpan);
+    item.appendChild(textSpan);
+
+    if(k.toLowerCase().includes("land")) {
+      landGroup.appendChild(item);
+      hasLandmarks = true;
+    } else {
+      trackGroup.appendChild(item);
+      hasTracks = true;
+    }
+  });
+
+  if(hasLandmarks) content.appendChild(landGroup);
+  if(hasTracks) content.appendChild(trackGroup);
+  
+  if(!hasLandmarks && !hasTracks){
+    Object.keys(layersData).forEach(k=>{
+      const div=document.createElement('div');
+      div.className='legend-item';
+      const clean = formatLayerName(k);
+      
+      const colorSpan = document.createElement('span');
+      colorSpan.className = 'legend-color';
+      colorSpan.style.background = layersData[k].color;
+      
+      const textSpan = document.createElement('span');
+      textSpan.textContent = clean;
+      
+      div.appendChild(colorSpan);
+      div.appendChild(textSpan);
+      content.appendChild(div);
+    });
+  }
+  
+  // Assemble legend
+  legend.innerHTML = '';
+  legend.appendChild(header);
+  legend.appendChild(content);
+}
+
+// POPUP — clusters do not produce popup (popup only for actual features)
+const popup = new mapboxgl.Popup({ closeButton:true });
+map.on('click', e=>{
+  const clickableLayers = Object.values(layersData)
+    .flatMap(l => {
+      const ids = [];
+      if(l.layerId) ids.push(l.layerId);          // symbol / points
+      if(l.layerId+'_outline') ids.push(l.layerId+'_outline'); // polygons outline
+      return ids;
+    })
+    .filter(id => !!map.getLayer(id));
+
+  const features = map.queryRenderedFeatures(e.point,{ layers: clickableLayers });
+  if(!features.length) return;
+
+  const f = features[0];
+  const coord = f.geometry.type==='Point' ? f.geometry.coordinates : e.lngLat;
+
+  popup.setLngLat(coord).setHTML(`
+    <div style="
+      padding:8px 12px;
+      border-radius:6px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.25);
+      font-family:Arial;
+  ">
+    <div style="font-size:14px; font-weight:600; margin-bottom:4px;">
+        ${f.properties?.name || f.properties?.title || 'Unnamed'}
+    </div>
+    <div style="font-size:12px;">
+        ${(typeof f.properties?.description === 'string') ? f.properties.description : (f.properties?.description?.value || '')}
+    </div>
+  </div>
+  `).addTo(map);
+});
+
+// helper: run an async pool with limited concurrency
+async function asyncPool(items, worker, concurrency=3){
+  const results = [];
+  const executing = [];
+  for(const item of items){
+    const p = Promise.resolve().then(()=>worker(item));
+    results.push(p);
+    executing.push(p);
+    p.then(()=> {
+      // remove from executing when done
+      const idx = executing.indexOf(p);
+      if(idx > -1) executing.splice(idx,1);
+    });
+    if(executing.length >= concurrency){
+      await Promise.race(executing);
+    }
+  }
+  return Promise.all(results);
+}
+
+// PROGRESSIVE BATCH LOADING - Optimized for fast initial load
+async function loadFeatures(){
+  try{
+    showLoading(true);
+    updateLoadingProgress(0, 0, 'Connecting to server...');
+    
+    // PARALLELIZE: Fetch count and first batch simultaneously for faster initial load
+    console.log('📊 Fetching count and first batch in parallel...');
+    const startTime = Date.now();
+    
+    const [countResp, firstBatchResp] = await Promise.all([
+      fetch('/api/features/count', { cache: "no-store" }),
+      fetch('/api/features/batch?page=0&limit=1000', { cache: "no-store" })
+    ]);
+    
+    if(!countResp.ok) throw new Error(`Failed to get count: ${countResp.status}`);
+    if(!firstBatchResp.ok) throw new Error(`Failed to load first batch: ${firstBatchResp.status}`);
+    
+    const { count: totalCount } = await countResp.json();
+    const firstBatchData = await firstBatchResp.json();
+    const firstBatchFeatures = firstBatchData.features || [];
+    
+    const parallelTime = Date.now() - startTime;
+    console.log(`⚡ Parallel fetch completed in ${parallelTime}ms`);
+    console.log(`📊 Total features: ${totalCount}`);
+    console.log(`📦 First batch: ${firstBatchFeatures.length} features`);
+    
+    if(totalCount === 0 || firstBatchFeatures.length === 0){
+      console.warn('No features found in database');
+      showLoading(false);
+      return;
+    }
+    
+    // Initialize storage with first batch
+    const allFeatures = [...firstBatchFeatures];
+    const byLayer = {};
+    let loadedCount = firstBatchFeatures.length;
+    let page = 1; // Start from page 1 since we already have page 0
+    const batchSize = 1000;
+    
+    // Group first batch immediately
+    firstBatchFeatures.forEach(f => {
+      const fname = f.file || 'default';
+      if(!byLayer[fname]) byLayer[fname] = [];
+      byLayer[fname].push(f);
+    });
+    
+    // Render first batch immediately for instant visual feedback
+    updateLoadingProgress(loadedCount, totalCount, 'Rendering first batch...');
+    await renderLayersProgressively(byLayer, loadedCount, totalCount);
+    
+    // Load remaining batches
+    updateLoadingProgress(loadedCount, totalCount, 'Loading remaining features...');
+    
+    while(true){
+      console.log(`📦 Loading batch ${page + 1}...`);
+      updateLoadingProgress(loadedCount, totalCount, `Loading batch ${page + 1}...`);
+      
+      const batchResp = await fetch(`/api/features/batch?page=${page}&limit=${batchSize}`, { 
+        cache: "no-store" 
+      });
+      
+      if(!batchResp.ok){
+        throw new Error(`Failed to load batch ${page + 1}: ${batchResp.status}`);
+      }
+      
+      const batchData = await batchResp.json();
+      const batchFeatures = batchData.features || [];
+      
+      if(batchFeatures.length === 0) break;
+      
+      // Add to collection
+      allFeatures.push(...batchFeatures);
+      loadedCount += batchFeatures.length;
+      
+      // Group by layer immediately
+      batchFeatures.forEach(f => {
+        const fname = f.file || 'default';
+        if(!byLayer[fname]) byLayer[fname] = [];
+        byLayer[fname].push(f);
+      });
+      
+      // Render layers progressively (every 2 batches or last batch)
+      if(!batchData.hasMore || (page + 1) % 2 === 0){
+        await renderLayersProgressively(byLayer, loadedCount, totalCount);
+      }
+      
+      updateLoadingProgress(loadedCount, totalCount, 
+        `Loaded ${loadedCount.toLocaleString()} of ${totalCount.toLocaleString()} features`);
+      
+      if(!batchData.hasMore) break;
+      page++;
+      
+      // Small delay to keep UI responsive (reduced for faster loading)
+      await new Promise(resolve => setTimeout(resolve, 30));
+    }
+    
+    console.log(`✅ All ${loadedCount} features loaded`);
+    
+    // Final render of all layers
+    updateLoadingProgress(loadedCount, totalCount, 'Finalizing layers...');
+    await renderLayersProgressively(byLayer, loadedCount, totalCount, true);
+    
+    // Render buttons and legend
+    const allLayerNames = Object.keys(byLayer);
+    allLayerNames.forEach(layerName => {
+      renderLayerButton(layerName);
+    });
+    updateLegend();
+    
+    updateLoadingProgress(totalCount, totalCount, 'Complete!');
+    const totalTime = Date.now() - startTime;
+    console.log(`✅ All features loaded and rendered successfully in ${totalTime}ms`);
+    
+    // Hide loading after a brief delay
+    setTimeout(() => {
+      showLoading(false);
+    }, 500);
+    
+  }catch(err){
+    console.error('❌ Error loading features:', err);
+    showLoading(false);
+    alert(`Failed to load features: ${err.message}\n\nCheck console for details.`);
+  }
+}
+
+// Render layers progressively
+async function renderLayersProgressively(byLayer, loadedCount, totalCount, isFinal = false){
+  // Clear existing only on first render
+  if(Object.keys(layersData).length === 0){
+    layersData = {};
+    fileLayers = {};
+    if(map._clusterHandlers) map._clusterHandlers.clear();
+    document.getElementById('pointLayers').innerHTML = '';
+    document.getElementById('trackLayers').innerHTML = '';
+    document.getElementById('legend').innerHTML = '';
+  }
+  
+  const allLayerNames = Object.keys(byLayer);
+  if(!allLayerNames.length) return;
+  
+  // Process layers with limited concurrency
+  const tasks = allLayerNames.map(layerName => async () => {
+    const key = layerName.toLowerCase();
+    const isLand = key.includes("land");
+    
+    // Only assign color if layer doesn't exist yet
+    let chosenColor = null;
+    if(!layersData[layerName] || !layersData[layerName].color){
+      // Check for specific layer colors first (e.g., TET Tracks)
+      const specificColor = getColorForLayer(layerName);
+      if(specificColor){
+        chosenColor = specificColor;
+      } else {
+        chosenColor = isLand ? nextBlue() : nextBrown();
+      }
+    }
+    
+    // Get all features for this layer (accumulated)
+    const layerFeatures = byLayer[layerName] || [];
+    if(layerFeatures.length === 0) return;
+    
+    // Update or create layer with all accumulated features (preserves existing color)
+    await addLayerIncrementally(layerName, layerFeatures, chosenColor);
+  });
+  
+  await asyncPool(tasks, fn => fn(), 3);
+}
+
+// TAB SWITCH
+document.getElementById('landmarksTabBtn').onclick=()=>{
+  document.getElementById('landmarksTab').classList.add('active');
+  document.getElementById('tracksTab').classList.remove('active');
+  document.getElementById('landmarksTabBtn').classList.add('active');
+  document.getElementById('tracksTabBtn').classList.remove('active');
+};
+
+document.getElementById('tracksTabBtn').onclick=()=>{
+  document.getElementById('tracksTab').classList.add('active');
+  document.getElementById('landmarksTab').classList.remove('active');
+  document.getElementById('tracksTabBtn').classList.add('active');
+  document.getElementById('landmarksTabBtn').classList.remove('active');
+};
+//fixed *2
+</script>
+</body>
+
+</html>
