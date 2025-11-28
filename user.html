@@ -6,11 +6,257 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="icon.png" type="image/png">
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* Professional Modern Design */
 body { margin:0; font-family:'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f5f7fa; }
 #map { width:100%; height:100%; }
+
+/* -----------------------------------
+   MAPBOX SEARCH BOX STYLING
+----------------------------------- */
+#geocoder-container {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 100%;
+  max-width: 420px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* Override Mapbox Search Box styles for better appearance */
+.mapboxgl-ctrl-geocoder {
+  width: 100% !important;
+  max-width: 100% !important;
+  font-family: 'DM Sans', 'Segoe UI', -apple-system, sans-serif !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1), 0 6px 20px rgba(0,0,0,0.08) !important;
+  border-radius: 28px !important;
+  border: none !important;
+}
+
+.mapboxgl-ctrl-geocoder--input {
+  height: 52px !important;
+  padding: 0 45px 0 50px !important;
+  font-size: 16px !important;
+  border-radius: 28px !important;
+  font-family: 'DM Sans', 'Segoe UI', -apple-system, sans-serif !important;
+}
+
+.mapboxgl-ctrl-geocoder--input:focus {
+  outline: none !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+
+.mapboxgl-ctrl-geocoder--icon-search {
+  left: 16px !important;
+  top: 16px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.mapboxgl-ctrl-geocoder--button {
+  top: 10px !important;
+  right: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  background: #f1f5f9 !important;
+  border-radius: 50% !important;
+}
+
+.mapboxgl-ctrl-geocoder--button:hover {
+  background: #e2e8f0 !important;
+}
+
+.mapboxgl-ctrl-geocoder--icon-close {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.mapboxgl-ctrl-geocoder .suggestions {
+  border-radius: 0 0 16px 16px !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+.mapboxgl-ctrl-geocoder .suggestions > li > a {
+  padding: 14px 18px !important;
+  font-family: 'DM Sans', 'Segoe UI', -apple-system, sans-serif !important;
+}
+
+.mapboxgl-ctrl-geocoder .suggestions > .active > a,
+.mapboxgl-ctrl-geocoder .suggestions > li > a:hover {
+  background: #f8fafc !important;
+}
+
+.mapboxgl-ctrl-geocoder--suggestion-title {
+  font-weight: 500 !important;
+}
+
+.mapboxgl-ctrl-geocoder--suggestion-address {
+  color: #64748b !important;
+}
+
+/* -----------------------------------
+   MAP STYLE TOGGLE BUTTON - SINGLE BUTTON BOTTOM LEFT
+----------------------------------- */
+#map-style-toggle {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+}
+
+.style-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  width: 80px;
+  height: 80px;
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+  border: 3px solid #ffffff;
+}
+
+.style-toggle-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.style-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+.style-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.3s ease;
+}
+
+.style-preview-street {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 30%, #d1fae5 70%, #a7f3d0 100%);
+}
+
+.style-preview-street::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #94a3b8;
+  transform: translateY(-50%);
+}
+
+.style-preview-street::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  background: #94a3b8;
+  transform: translateX(-50%);
+}
+
+.style-preview-satellite {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 30%, #1a4a3a 60%, #2d5a4a 100%);
+}
+
+.style-preview-satellite::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  width: 35%;
+  height: 30%;
+  background: rgba(255,255,255,0.12);
+  border-radius: 50%;
+  transform: rotate(-15deg);
+}
+
+.style-preview-satellite::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: 8%;
+  width: 45%;
+  height: 25%;
+  background: rgba(100,150,100,0.35);
+  border-radius: 3px;
+}
+
+.style-label-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: 'DM Sans', 'Segoe UI', -apple-system, sans-serif;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #map-style-toggle {
+    bottom: 16px;
+    left: 16px;
+  }
+  
+  .style-toggle-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+  }
+  
+  .style-label-overlay {
+    font-size: 9px;
+    padding: 5px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  #map-style-toggle {
+    bottom: 12px;
+    left: 12px;
+  }
+  
+  .style-toggle-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border-width: 2px;
+  }
+  
+  .style-label-overlay {
+    font-size: 8px;
+    padding: 4px 0;
+  }
+}
 
 /* -----------------------------------
    PROFESSIONAL SIDEBAR DESIGN
@@ -615,24 +861,28 @@ body { margin:0; font-family:'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, san
 ----------------------------------- */
 /* Custom Scrollbar */
 .tab-content::-webkit-scrollbar,
-#legend-content::-webkit-scrollbar {
+#legend-content::-webkit-scrollbar,
+#search-results::-webkit-scrollbar {
   width: 5px;
 }
 
 .tab-content::-webkit-scrollbar-track,
-#legend-content::-webkit-scrollbar-track {
+#legend-content::-webkit-scrollbar-track,
+#search-results::-webkit-scrollbar-track {
   background: #f9fafb;
   border-radius: 3px;
 }
 
 .tab-content::-webkit-scrollbar-thumb,
-#legend-content::-webkit-scrollbar-thumb {
+#legend-content::-webkit-scrollbar-thumb,
+#search-results::-webkit-scrollbar-thumb {
   background: #d1d5db;
   border-radius: 3px;
 }
 
 .tab-content::-webkit-scrollbar-thumb:hover,
-#legend-content::-webkit-scrollbar-thumb:hover {
+#legend-content::-webkit-scrollbar-thumb:hover,
+#search-results::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
 
@@ -643,6 +893,16 @@ body { margin:0; font-family:'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, san
         max-height: 50vh;
         border-right: none;
         border-bottom: 1px solid #e1e8ed;
+    }
+
+    #search-container {
+        max-width: 100%;
+        padding: 0 12px;
+    }
+
+    #search-box {
+        height: 48px;
+        font-size: 15px;
     }
 
     #legend {
@@ -780,12 +1040,25 @@ body { margin:0; font-family:'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, san
     <!-- MAP -->
     <div id="map-container" style="flex:1; position:relative;">
         <div id="map"></div>
+        
+        <!-- MAPBOX GEOCODER SEARCH -->
+        <div id="geocoder-container"></div>
+        
         <div id="legend"></div>
+        
+        <!-- MAP STYLE TOGGLE - SINGLE BUTTON -->
+        <div id="map-style-toggle">
+            <button class="style-toggle-btn" id="styleToggleBtn" title="Toggle map style">
+                <div class="style-preview style-preview-satellite"></div>
+                <span class="style-label-overlay">Satellite</span>
+            </button>
+        </div>
     </div>
 
 </div>
 
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
 
 <script>
 mapboxgl.accessToken = "pk.eyJ1IjoiYWxpaGFtemEtMTQiLCJhIjoiY2x4dHkzdHJ6MWhzOTJrcXdqcnFsYnU4dyJ9.LbRvUbNnNk2rUq13y-8gFQ";
@@ -947,6 +1220,34 @@ let layersData = {};
 let fileLayers = {};
 let currentlyIsolated = null;
 let layerVisibility = {}; // Track visibility state for legend toggle
+
+// =====================================================
+// MAPBOX GEOCODER - ADDRESS/LOCATION SEARCH
+// =====================================================
+const geocoder = new MapboxGeocoder({
+  accessToken: mapboxgl.accessToken,
+  mapboxgl: mapboxgl,
+  marker: {
+    color: '#3b82f6'
+  },
+  placeholder: 'Search for an address or place...',
+  proximity: {
+    longitude: 16.3,
+    latitude: 39.3
+  }
+});
+
+// Add geocoder to the container
+document.getElementById('geocoder-container').appendChild(geocoder.onAdd(map));
+
+// Handle result selection
+geocoder.on('result', (e) => {
+  console.log('📍 Search result:', e.result.place_name);
+});
+
+// =====================================================
+// END MAPBOX GEOCODER
+// =====================================================
 
 // UTIL FUNCTIONS
 function sanitizeCoords(c){ 
@@ -1689,6 +1990,10 @@ async function loadFeatures(){
     
     console.log(`✅ All ${loadedCount} features loaded`);
     
+    // Store all features for search functionality
+    allFeaturesForSearch = allFeatures;
+    console.log(`🔍 Search index ready with ${allFeaturesForSearch.length} features`);
+    
     updateLoadingProgress(loadedCount, totalCount, 'Finalizing layers...');
     await renderLayersProgressively(byLayer, loadedCount, totalCount, true);
     
@@ -1764,6 +2069,138 @@ document.getElementById('tracksTabBtn').onclick=()=>{
   document.getElementById('tracksTabBtn').classList.add('active');
   document.getElementById('landmarksTabBtn').classList.remove('active');
 };
+
+// =====================================================
+// MAP STYLE TOGGLE - SATELLITE / STREET VIEW (SINGLE BUTTON)
+// =====================================================
+const mapStyles = {
+  streets: 'mapbox://styles/mapbox/streets-v11',
+  satellite: 'mapbox://styles/mapbox/satellite-streets-v12'
+};
+
+let currentMapStyle = 'streets';
+let allFeaturesForSearch = []; // Store all features for layer reload
+
+const styleToggleBtn = document.getElementById('styleToggleBtn');
+const stylePreview = styleToggleBtn.querySelector('.style-preview');
+const styleLabel = styleToggleBtn.querySelector('.style-label-overlay');
+
+function switchMapStyle() {
+  // Toggle between styles
+  const newStyle = currentMapStyle === 'streets' ? 'satellite' : 'streets';
+  currentMapStyle = newStyle;
+  
+  // Update button appearance to show the OTHER style (what you'll switch TO)
+  if (newStyle === 'satellite') {
+    stylePreview.className = 'style-preview style-preview-street';
+    styleLabel.textContent = 'Map';
+  } else {
+    stylePreview.className = 'style-preview style-preview-satellite';
+    styleLabel.textContent = 'Satellite';
+  }
+  
+  // Store current map state
+  const currentCenter = map.getCenter();
+  const currentZoom = map.getZoom();
+  const currentBearing = map.getBearing();
+  const currentPitch = map.getPitch();
+  
+  // Change the map style
+  map.setStyle(mapStyles[newStyle]);
+  
+  // Re-add layers after style loads
+  map.once('style.load', async () => {
+    // Restore map position
+    map.setCenter(currentCenter);
+    map.setZoom(currentZoom);
+    map.setBearing(currentBearing);
+    map.setPitch(currentPitch);
+    
+    // Re-add all sources and layers
+    await reloadAllLayers();
+  });
+}
+
+async function reloadAllLayers() {
+  // Reset the tinted icon cache since we need to re-add images
+  tintedIconCache.clear();
+  
+  // Reload the base icon
+  try {
+    const r = await fetch('icon.png', {cache: "force-cache"});
+    if(r.ok){
+      const blob = await r.blob();
+      baseIconDataUrl = await blobToDataURL(blob);
+    }
+  } catch(e) {
+    console.warn('Could not reload icon:', e);
+  }
+  
+  // Group features by layer name from allFeaturesForSearch
+  const byLayer = {};
+  allFeaturesForSearch.forEach(f => {
+    const fname = f.file || 'default';
+    if(!byLayer[fname]) byLayer[fname] = [];
+    byLayer[fname].push(f);
+  });
+  
+  // Clear tracking objects but keep the colors
+  const savedColors = {};
+  Object.keys(layersData).forEach(k => {
+    savedColors[k] = layersData[k].color;
+  });
+  
+  // Reset layers data but preserve visibility
+  const savedVisibility = { ...layerVisibility };
+  
+  // Clear the layer tracking
+  Object.keys(fileLayers).forEach(k => {
+    fileLayers[k] = [];
+  });
+  
+  // Re-add each layer
+  for (const layerName of Object.keys(byLayer)) {
+    const features = byLayer[layerName];
+    const color = savedColors[layerName] || getColorForLayer(layerName) || 
+                  (layerName.toLowerCase().includes('land') ? landmarkColors[0] : trackColors[0]);
+    
+    // Reset the layer data entry
+    layersData[layerName] = {
+      color,
+      sourceId: 'src_' + layerName,
+      layerId: 'lyr_' + layerName,
+      batchCursor: features.length,
+      featuresCount: features.length,
+      geomType: features[0]?.geometry?.type || 'Point',
+      bounds: null
+    };
+    
+    fileLayers[layerName] = [];
+    
+    await addLayerIncrementally(layerName, features, color);
+    
+    // Restore visibility
+    if (savedVisibility[layerName] === false) {
+      const ids = fileLayers[layerName] || [];
+      ids.forEach(id => {
+        if(map.getLayer(id)) {
+          map.setLayoutProperty(id, 'visibility', 'none');
+        }
+      });
+    }
+  }
+  
+  // Restore visibility state
+  layerVisibility = savedVisibility;
+  
+  // Update legend to reflect current state
+  updateLegend();
+  
+  console.log('✅ All layers reloaded after style change');
+}
+
+// Event listener for style toggle button
+styleToggleBtn.addEventListener('click', switchMapStyle);
 </script>
 </body>
 </html>
