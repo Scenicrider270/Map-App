@@ -1354,11 +1354,11 @@ body {
 <script>
 mapboxgl.accessToken = "pk.eyJ1IjoiYWxpaGFtemEtMTQiLCJhIjoiY2x4dHkzdHJ6MWhzOTJrcXdqcnFsYnU4dyJ9.LbRvUbNnNk2rUq13y-8gFQ";
 
-// CHANGE #3: Starting point is now Southern Italy (Calabria region)
+// Starting point: Northern Italy and the Alps
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v11',
-  center: [16.3, 39.3], // Southern Italy (Calabria)
+  center: [11.5, 46.0], // Northern Italy and the Alps
   zoom: 7,
   projection: 'globe' // Use globe projection for 3D view
 });
@@ -1527,8 +1527,8 @@ const geocoder = new MapboxGeocoder({
   },
   placeholder: 'Search for an address or place...',
   proximity: {
-    longitude: 16.3,
-    latitude: 39.3
+    longitude: 11.5,
+    latitude: 46.0
   }
 });
 
