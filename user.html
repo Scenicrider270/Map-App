@@ -1188,7 +1188,8 @@ const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/streets-v11',
   center: [16.3, 39.3], // Southern Italy (Calabria)
-  zoom: 7
+  zoom: 7,
+  projection: 'globe' // Use globe projection for 3D view
 });
 
 // ENTERPRISE PROFESSIONAL COLOR PALETTE
@@ -1246,6 +1247,9 @@ const tintedIconCache = new Map();
 let baseIconDataUrl = null;
 
 map.on("load", () => {
+    // Ensure globe projection is set on initial load
+    map.setProjection('globe');
+    
     (async ()=>{
         try{
             const r = await fetch('icon.png', {cache: "force-cache"});
@@ -2153,6 +2157,9 @@ function switchMapStyle() {
   
   // Re-add layers after style loads
   map.once('style.load', async () => {
+    // Set globe projection for both styles
+    map.setProjection('globe');
+    
     // Restore map position
     map.setCenter(currentCenter);
     map.setZoom(currentZoom);
