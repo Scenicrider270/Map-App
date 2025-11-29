@@ -424,6 +424,13 @@ body {
   border:1px solid #e5e7eb;
 }
 
+@media (max-width: 768px) {
+  #legend {
+    min-width: auto;
+    max-width: none;
+  }
+}
+
 #legend-header {
   background: #1f2937;
   padding:16px 20px;
@@ -598,18 +605,24 @@ body {
 ----------------------------------- */
 .mapboxgl-popup {
   max-width: 320px !important;
+  width: 320px !important;
   z-index: 1000;
 }
 
+/* Force popup width on mobile - override Mapbox defaults */
 @media (max-width: 768px) {
   .mapboxgl-popup {
-    max-width: calc(100vw - 32px) !important;
+    max-width: 240px !important;
+    width: 240px !important;
+        min-width: auto !important;
   }
 }
 
 @media (max-width: 480px) {
   .mapboxgl-popup {
-    max-width: calc(100vw - 24px) !important;
+    max-width: 180px !important;
+    width: 180px !important;
+    min-width: auto !important;
   }
 }
 
@@ -619,6 +632,23 @@ body {
   box-shadow: 0 10px 40px rgba(0,0,0,0.2), 0 2px 10px rgba(0,0,0,0.1) !important;
   overflow: hidden;
   border: 1px solid #e5e7eb;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  .mapboxgl-popup-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mapboxgl-popup-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 }
 
 .mapboxgl-popup-close-button {
@@ -967,91 +997,28 @@ body {
 
 @media (max-width: 768px) {
     #legend {
-        bottom: 80px;
-        right: 12px;
-        left: 12px;
-        max-width: none;
+        bottom: 20px;
+        right: 8px;
+        left: auto;
+        max-width: 280px;
         min-width: auto;
-        max-height: calc(50vh - 90px);
+        max-height: 30vh;
         border-radius: 8px;
     }
     
     #legend-header {
-        padding: 14px 18px;
+        padding: 8px 12px;
         border-radius: 8px 8px 0 0;
     }
     
-    #legend-header-text {
-        font-size: 13px;
-    }
-    
-    #legend-content {
-        padding: 14px 18px;
-        max-height: calc(50vh - 145px);
-    }
-    
-    .legend-item {
-        font-size: 12px;
-        padding: 8px 6px;
-        min-height: 44px;
-        gap: 10px;
-    }
-    
-    .legend-color {
-        width: 14px;
-        height: 14px;
-        min-width: 14px;
-        min-height: 14px;
-    }
-    
-    .legend-toggle {
+    #legend-header-icon {
         width: 16px;
         height: 16px;
-        min-width: 16px;
-        min-height: 16px;
     }
     
-    .mapboxgl-popup {
-        max-width: calc(100vw - 32px) !important;
-        width: calc(100vw - 32px) !important;
-    }
-    
-    .popup-header {
-        padding: 14px 16px;
-    }
-    
-    .popup-title {
-        font-size: 15px;
-        padding-right: 20px;
-    }
-    
-    .popup-body {
-        padding: 14px 16px;
-    }
-    
-    .popup-actions {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .popup-btn {
-        min-height: 44px;
-        padding: 12px 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    #legend {
-        bottom: 70px;
-        right: 8px;
-        left: 8px;
-        max-height: calc(50vh - 80px);
-        border-radius: 6px;
-    }
-    
-    #legend-header {
-        padding: 12px 16px;
-        border-radius: 6px 6px 0 0;
+    #legend-header-icon svg {
+        width: 9px;
+        height: 9px;
     }
     
     #legend-header-text {
@@ -1060,94 +1027,298 @@ body {
     }
     
     #legend-content {
-        padding: 12px 16px;
-        max-height: calc(50vh - 130px);
+        padding: 8px 12px;
+        max-height: calc(30vh - 42px);
     }
     
     .legend-item {
-        font-size: 11px;
-        padding: 10px 6px;
-        gap: 10px;
-        min-height: 48px;
+        font-size: 10px;
+        padding: 5px 4px;
+        min-height: 32px;
+        gap: 6px;
     }
     
     .legend-color {
+        width: 10px;
+        height: 10px;
+        min-width: 10px;
+        min-height: 10px;
+    }
+    
+    .legend-toggle {
         width: 12px;
         height: 12px;
         min-width: 12px;
         min-height: 12px;
     }
     
-    .legend-toggle {
-        width: 16px;
-        height: 16px;
-        min-width: 16px;
-        min-height: 16px;
+    .legend-toggle svg {
+        width: 8px;
+        height: 8px;
     }
     
     .legend-group-title {
-        font-size: 10px;
-        margin-bottom: 8px;
+        font-size: 8px;
+        margin-bottom: 4px;
+        gap: 5px;
     }
     
     .legend-group-title-icon {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
     }
     
     .legend-group-title-icon svg {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
     }
     
     .mapboxgl-popup {
-        max-width: calc(100vw - 24px) !important;
-        width: calc(100vw - 24px) !important;
+        max-width: 240px !important;
+        width: 240px !important;
+        max-height: 45vh !important;
+    }
+    
+    .mapboxgl-popup-content {
+        padding: 0 !important;
+        max-height: 45vh;
+        overflow-y: auto;
+        border-radius: 8px !important;
+        width: 100% !important;
     }
     
     .popup-header {
-        padding: 12px 14px;
+        padding: 5px 6px;
     }
     
     .popup-title {
-        font-size: 14px;
-        padding-right: 18px;
+        font-size: 10px;
+        padding-right: 16px;
+        line-height: 1.2;
+        margin-bottom: 1px;
     }
     
     .popup-subtitle {
-        font-size: 11px;
+        font-size: 7px;
     }
     
     .popup-body {
-        padding: 12px 14px;
+        padding: 5px 6px;
     }
     
     .popup-description {
-        font-size: 13px;
-        margin-bottom: 12px;
+        font-size: 9px;
+        line-height: 1.3;
+        margin-bottom: 5px;
     }
     
     .popup-coordinates {
-        padding: 8px 10px;
-        margin-bottom: 12px;
-        font-size: 11px;
+        padding: 3px 5px;
+        margin-bottom: 5px;
+        font-size: 7px;
+    }
+    
+    .popup-coordinates svg {
+        width: 8px;
+        height: 8px;
     }
     
     .popup-coordinates span {
-        font-size: 10px;
+        font-size: 6px;
+    }
+    
+    .popup-actions {
+        flex-direction: column;
+        gap: 3px;
     }
     
     .popup-btn {
-        min-height: 48px;
-        font-size: 12px;
-        padding: 12px 14px;
+        min-height: 30px;
+        padding: 5px 6px;
+        font-size: 8px;
     }
     
     .mapboxgl-popup-close-button {
-        width: 28px;
-        height: 28px;
-        font-size: 18px;
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+        font-size: 11px;
+        padding: 2px 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    #legend {
+        bottom: 20px;
+        right: 6px;
+        left: auto;
+        max-width: 240px;
+        max-height: 25vh;
+        border-radius: 6px;
+        min-width: auto;
+    }
+    
+    #legend-header {
         padding: 6px 10px;
+        border-radius: 6px 6px 0 0;
+    }
+    
+    #legend-header-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    #legend-header-icon svg {
+        width: 8px;
+        height: 8px;
+    }
+    
+    #legend-header-text {
+        font-size: 9px;
+        letter-spacing: 0.2px;
+    }
+    
+    #legend-content {
+        padding: 6px 10px;
+        max-height: calc(25vh - 32px);
+    }
+    
+    .legend-item {
+        font-size: 9px;
+        padding: 4px 3px;
+        gap: 6px;
+        min-height: 28px;
+    }
+    
+    .legend-color {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        min-height: 8px;
+    }
+    
+    .legend-toggle {
+        width: 12px;
+        height: 12px;
+        min-width: 12px;
+        min-height: 12px;
+    }
+    
+    .legend-toggle svg {
+        width: 7px;
+        height: 7px;
+    }
+    
+    .legend-group-title {
+        font-size: 7px;
+        margin-bottom: 4px;
+        gap: 4px;
+        letter-spacing: 0.6px;
+    }
+    
+    .legend-group-title-icon {
+        width: 9px;
+        height: 9px;
+    }
+    
+    .legend-group-title-icon svg {
+        width: 9px;
+        height: 9px;
+    }
+    
+    .mapboxgl-popup {
+        max-width: 180px !important;
+        width: 180px !important;
+        max-height: 35vh !important;
+    }
+    
+    .mapboxgl-popup-content {
+        padding: 0 !important;
+        max-height: 35vh;
+        overflow-y: auto;
+        border-radius: 6px !important;
+        width: 100% !important;
+    }
+    
+    .popup-header {
+        padding: 4px 5px;
+    }
+    
+    .popup-title {
+        font-size: 9px;
+        padding-right: 14px;
+        line-height: 1.2;
+        margin-bottom: 1px;
+    }
+    
+    .popup-subtitle {
+        font-size: 6px;
+        gap: 2px;
+    }
+    
+    .popup-subtitle svg {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .popup-body {
+        padding: 4px 5px;
+    }
+    
+    .popup-description {
+        font-size: 8px;
+        line-height: 1.3;
+        margin-bottom: 4px;
+    }
+    
+    .popup-no-description {
+        font-size: 7px;
+        margin-bottom: 4px;
+    }
+    
+    .popup-coordinates {
+        padding: 3px 4px;
+        margin-bottom: 4px;
+        font-size: 6px;
+    }
+    
+    .popup-coordinates svg {
+        width: 7px;
+        height: 7px;
+    }
+    
+    .popup-coordinates span {
+        font-size: 5px;
+    }
+    
+    .popup-actions {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .popup-btn {
+        min-height: 28px;
+        font-size: 7px;
+        padding: 4px 5px;
+        gap: 2px;
+    }
+    
+    .popup-btn-primary svg,
+    .popup-btn-secondary svg {
+        width: 9px;
+        height: 9px;
+    }
+    
+    .mapboxgl-popup-close-button {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        min-height: 18px;
+        font-size: 10px;
+        padding: 2px 4px;
+        right: 2px;
+        top: 2px;
     }
 }
 </style>
@@ -1904,12 +2075,23 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// POPUP - Enhanced click handler
+// POPUP - Enhanced click handler with responsive width
+const getPopupMaxWidth = () => {
+  if (window.innerWidth <= 480) return '180px';
+  if (window.innerWidth <= 768) return '240px';
+  return '320px';
+};
+
 const popup = new mapboxgl.Popup({ 
   closeButton: true,
   closeOnClick: true,
-  maxWidth: '320px',
+  maxWidth: getPopupMaxWidth(),
   className: 'custom-popup'
+});
+
+// Update popup width on resize
+window.addEventListener('resize', () => {
+  popup.options.maxWidth = getPopupMaxWidth();
 });
 
 map.on('click', e=>{
